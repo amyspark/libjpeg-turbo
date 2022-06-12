@@ -1127,6 +1127,22 @@ DLLEXPORT int tjEncodeYUVPlanes(tjhandle handle, const unsigned char *srcBuf,
 */
 DLLEXPORT tjhandle tjInitDecompress(void);
 
+/**
+ * Prime the decompressor instance with coefficient tables from an "Abbreviated
+ * table specification" datastream.
+ *
+ * @param handle a handle to a TurboJPEG decompressor or transformer instance
+ *
+ * @param jpegBuf pointer to a buffer containing a JPEG abbreviated datastream.
+ *
+ * @param jpegSize size of the JPEG datastream (in bytes)
+ *
+ * @return 0 if successful, or -1 if an error occurred (see #tjGetErrorStr2()
+ * and #tjGetErrorCode().)
+ */
+DLLEXPORT int tjLoadCoefficientTables(tjhandle handle,
+                                      const unsigned char *jpegBuf,
+                                      unsigned long jpegSize);
 
 /**
  * Retrieve information about a JPEG image without decompressing it.

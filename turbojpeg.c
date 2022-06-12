@@ -1202,6 +1202,39 @@ DLLEXPORT tjhandle tjInitDecompress(void)
   return _tjInitDecompress(this);
 }
 
+DLLEXPORT int tjLoadCoefficientTables(tjhandle handle,
+                                      const unsigned char *jpegBuf,
+                                      unsigned long jpegSize) {
+  int retval = 0;
+
+  GET_DINSTANCE(handle);
+  if ((this->init & DECOMPRESS) == 0)
+    THROW("tjLoadCoefficientTables(): Instance has not been initialized for "
+          "decompression");
+
+  if (jpegBuf == NULL || jpegSize <= 0)
+    THROW("tjLoadCoefficientTables(): Invalid argument");
+
+  if (setjmp(this->jerr.setjmp_buffer)) {
+    /* If we get here, the JPEG code has signaled an error. */
+    return -1;
+  }
+
+  jpeg_mem_src_tj(dinfo, jpegBuf, jpegSize);
+  retval = jpeg_read_header(dinfo, FALSE);
+
+  if (retval != JPEG_HEADER_TABLES_ONLY) {
+    THROW("tjLoadCoefficientTables(): Invalid abbreviated datastream supplied");
+  }
+
+  // Unlike tjDecompressHeader3, this function must *not* reset the
+  // decompressor state.
+
+bailout:
+  if (this->jerr.warning)
+    retval = -1;
+  return retval;
+}
 
 DLLEXPORT int tjDecompressHeader3(tjhandle handle,
                                   const unsigned char *jpegBuf,
